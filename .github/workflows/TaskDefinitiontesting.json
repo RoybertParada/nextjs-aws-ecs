@@ -29,10 +29,6 @@
     "taskRoleArn": "arn:aws:iam::008584862663:role/frontend-dev-20240630231726441900000006",
     "executionRoleArn": "arn:aws:iam::008584862663:role/frontend-dev-20240630231726440600000002",
     "networkMode": "awsvpc",
-    "compatibilities": [
-        "EC2",
-        "FARGATE"
-    ],
     "requiresCompatibilities": [
         "FARGATE"
     ],
