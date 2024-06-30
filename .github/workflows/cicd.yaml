@@ -26,7 +26,7 @@ jobs:
         run: |
           if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
             echo "environment=main" >> $GITHUB_OUTPUT
-          else if [[ "${{github.ref}}" == "refs/heads/testing" ]]; then
+          elif [[ "${{github.ref}}" == "refs/heads/testing" ]]; then
             echo "environment=testing" >> $GITHUB_OUTPUT
           else
             echo "environment=dev" >> $GITHUB_OUTPUT  
