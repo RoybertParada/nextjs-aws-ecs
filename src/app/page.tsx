@@ -6,7 +6,7 @@ export default function Home() {
   const [environment, setEnvironment] = useState('');
 
   useEffect(() => {
-    setEnvironment(process.env.NEXT_PUBLIC_ENVIRONMENT_NAME || 'Unknown');
+    setEnvironment(process.env.ENVIRONMENT_NAME || 'Unknown');
   }, []);
 
   return (

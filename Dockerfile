@@ -3,7 +3,8 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-
+ARG ENVIRONMENT_NAME
+ENV ENVIRONMENT_NAME=$ENVIRONMENT_NAME
 RUN npm install
 
 COPY . .
