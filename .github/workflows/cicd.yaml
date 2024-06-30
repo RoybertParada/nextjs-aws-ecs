@@ -47,7 +47,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4.0.1
         with:
           aws-region: us-east-2
-          role-to-assume: arn:aws:iam::008584862663:role/GithubActionsOIDC-Role-qqTgWxeNl6WP
+          role-to-assume: arn:aws:iam::008584862663:role/GithubActionsOIDC-Role-Q6T0TrbpakTg
           role-session-name: GithubActionsOIDC-Role-qqTgWxeNl6WP
           mask-aws-account-id: 'false'
 
@@ -79,7 +79,7 @@ jobs:
       uses: aws-actions/configure-aws-credentials@v4.0.1
       with:
         aws-region: us-east-2
-        role-to-assume: arn:aws:iam::008584862663:role/GithubActionsOIDC-Role-qqTgWxeNl6WP
+        role-to-assume: arn:aws:iam::008584862663:role/GithubActionsOIDC-Role-Q6T0TrbpakTg
         role-session-name: GithubActionsOIDC-Role-qqTgWxeNl6WP
         mask-aws-account-id: 'false'
       
