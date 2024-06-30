@@ -1,0 +1,41 @@
+{
+   "containerDefinitions": [
+        {
+            "name": "frontend-testing",
+            "image": "008584862663.dkr.ecr.us-east-2.amazonaws.com/frontend-ecr-testing:latest",
+            "cpu": 256,
+            "memory": 512,
+            "portMappings": [
+                {
+                    "name": "frontend-testing",
+                    "containerPort": 3000,
+                    "hostPort": 3000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/frontend/testing",
+                    "awslogs-create-group": "true",
+                    "awslogs-region": "us-east-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "family": "frontend-testing",
+    "taskRoleArn": "arn:aws:iam::008584862663:role/frontend-testing-20240630200201324600000007",
+    "executionRoleArn": "arn:aws:iam::008584862663:role/frontend-testing-20240630200200469600000003",
+    "networkMode": "awsvpc",
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
