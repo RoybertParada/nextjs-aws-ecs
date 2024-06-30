@@ -31,6 +31,9 @@ jobs:
           else
             echo "environment=dev" >> $GITHUB_OUTPUT  
           fi
+      
+      - name: Get Environment Name
+        run: echo "environment_name=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT  
 
   build-docker-image: # package job for building and publishing docker images
     runs-on: ubuntu-latest
@@ -62,7 +65,7 @@ jobs:
           ECR_REPOSITORY: "frontend-ecr-${{needs.setting-environment.outputs.environment}}"
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build --build-arg ENVIRONMENT_NAME=${{github.ref}} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . 
+          docker build --build-arg ENVIRONMENT_NAME=${{needs.setting-environment.outputs.environment_name}} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . 
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "webimage=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
     
