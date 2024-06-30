@@ -1,6 +1,14 @@
+"use client";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [environment, setEnvironment] = useState('');
+
+  useEffect(() => {
+    setEnvironment(process.env.ENVIRONMENT_NAME || 'Unknown');
+  }, []);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
@@ -108,6 +116,9 @@ export default function Home() {
           </p>
         </a>
       </div>
+      <div className="fixed bottom-0 left-0 w-full p-6 text-center text-gray-800 dark:text-gray-200">
+        Environment: {environment}
+      </div> {/* 4. Mostrar la variable de entorno */}
     </main>
   );
 }

@@ -1,0 +1,103 @@
+# name of our workflow
+name: PoC CI/CD Workflow
+
+# triggers for our workflow
+on:
+  # any code pushed to master and develop branch will also be a trigger
+  push:
+    branches:
+      - main
+      - testing
+      - develop
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  setting-environment:
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.set-vars.outputs.environment }}
+    
+    steps:
+      - name: Set Variables
+        id: set-vars
+        run: |
+          if [[ "${{github.ref}}" == "refs/heads/main" ]]; then
+            echo "environment=main" >> $GITHUB_OUTPUT
+          elif [[ "${{github.ref}}" == "refs/heads/testing" ]]; then
+            echo "environment=testing" >> $GITHUB_OUTPUT
+          else
+            echo "environment=dev" >> $GITHUB_OUTPUT  
+          fi
+
+  build-docker-image: # package job for building and publishing docker images
+    runs-on: ubuntu-latest
+    outputs:
+      webimage: ${{ steps.build-web-image.outputs.webimage }}
+
+    needs: setting-environment
+    if: ${{ github.event_name == 'push' }} # will be fired if the trigger event is a push event.
+    steps:
+      - name: Checkout Code # checking out code.
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4.0.1
+        with:
+          aws-region: us-east-2
+          role-to-assume: arn:aws:iam::008584862663:role/GithubActionsOIDC-Role-Q6T0TrbpakTg
+          role-session-name: GithubActionsOIDC-Role-qqTgWxeNl6WP
+          mask-aws-account-id: 'false'
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2.0.1
+
+      - name: Build, tag, and push Web Image to Amazon ECR
+        id: build-web-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: "frontend-ecr-${{needs.setting-environment.outputs.environment}}"
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build --build-arg ENVIRONMENT_NAME=${{github.ref}} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG . 
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "webimage=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+    
+
+  deploy-to-ecs: # deploy job is for deploying our code to google cloud cluster.
+    runs-on: ubuntu-latest
+    needs: [build-docker-image, setting-environment] # will require build-docker-image to be successful for triggering
+    steps:
+
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4.0.1
+      with:
+        aws-region: us-east-2
+        role-to-assume: arn:aws:iam::008584862663:role/GithubActionsOIDC-Role-Q6T0TrbpakTg
+        role-session-name: GithubActionsOIDC-Role-qqTgWxeNl6WP
+        mask-aws-account-id: 'false'
+      
+    - name: Fill in the new web image ID in the Amazon ECS task definition
+      id: web-image-update
+      uses: aws-actions/amazon-ecs-render-task-definition@v1.3.0
+      with:
+        task-definition: .github/workflows/TaskDefinition${{needs.setting-environment.outputs.environment}}.json
+        container-name: frontend-${{needs.setting-environment.outputs.environment}}
+        image: ${{needs.build-docker-image.outputs.webimage}}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1.5.0
+      with:
+        task-definition: ${{ steps.web-image-update.outputs.task-definition }}
+        service: frontend-${{needs.setting-environment.outputs.environment}}
+        cluster: ecs-cluster
+        wait-for-service-stability: true
+
+    
+    
