@@ -8,7 +8,7 @@ terraform {
 
 inputs = {
     repository_name = "frontend-ecr-testing"
-
+    repository_force_delete = true
     repository_lifecycle_policy = jsonencode({
         rules = [
             {

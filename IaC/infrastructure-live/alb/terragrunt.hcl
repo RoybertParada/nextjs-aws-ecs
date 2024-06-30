@@ -12,6 +12,7 @@ dependency "vpc" {
 
 inputs = {
     name    = "poc-alb"
+    enable_deletion_protection = false
     vpc_id  = dependency.vpc.outputs.vpc_id
     # Set Subnets from VPC module
     subnets = dependency.vpc.outputs.public_subnets
